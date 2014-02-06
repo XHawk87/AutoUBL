@@ -1,0 +1,21 @@
+# banlist-url: The URL to check for the banlist
+# max-bandwidth: The maximum bandwidth to allocate to loading the banlist in 
+#                kB/sec (faster values load the banlist quicker, lower values 
+#                reduce the impact of denial of service attacks from the banlist 
+#                server)
+# timeout: The time in seconds before the connection to the banlist server times 
+#          out (longer time deals with larger banlists better, shorter time
+#          reduces the duration of denial of service attacks from the banlist
+#          server
+# retries: How many times to attempt to reconnect to the server if it fails to
+#          connect before falling back on the local UBL backup
+# auto-check-interval: How often (in minutes) to check the UBL and update it (0 
+#                      for startup only)
+# exempt: a list of players exempt from the UBL on this server
+---
+banlist-url: 'http://www.paralleluhc.net/ubl/list/ubl.txt'
+max-bandwidth: 64
+timeout: 5
+retries: 3
+auto-check-interval: 60
+exempt: []

@@ -1,0 +1,20 @@
+name: ${project.name}
+main: ${project.groupId}.${project.artifactId}.${project.name}
+version: ${project.version}
+description: ${project.description}
+
+commands:
+  ubl:
+    description: Display a list of all UBL commands
+    usage: /ubl
+
+permissions:
+  autoubl.commands.exemption:
+    description: Allows use of the /ubl exempt and /ubl unexempt commands
+    default: op
+  autoubl.commands.update:
+    description: Allows use of the /ubl update command
+    default: op
+  autoubl.commands.reload:
+    description: Allows use of the /ubl reload command
+    default: op
