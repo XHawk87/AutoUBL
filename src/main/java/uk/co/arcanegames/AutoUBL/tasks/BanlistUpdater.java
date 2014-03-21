@@ -154,7 +154,6 @@ public class BanlistUpdater implements Runnable {
                             newCookie = newCookie.substring(0, newCookie.indexOf(";"));
                             String cookieName = newCookie.substring(0, newCookie.indexOf("="));
                             String cookieValue = newCookie.substring(newCookie.indexOf("=") + 1, newCookie.length());
-                            System.out.println("Set-Cookie: " + newCookie);
                             if (cookies.length() != 0) {
                                 cookies.append("; ");
                             }

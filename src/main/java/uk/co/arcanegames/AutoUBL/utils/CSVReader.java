@@ -32,6 +32,9 @@ public class CSVReader {
                 sb.append(c);
             }
         }
+        if (sb.length() != 0) {
+            fields.add(sb.toString());
+        }
         return fields.toArray(new String[fields.size()]);
     }
 }
