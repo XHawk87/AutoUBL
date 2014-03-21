@@ -5,6 +5,7 @@
 package uk.co.arcanegames.AutoUBL;
 
 import java.util.Objects;
+import uk.co.arcanegames.AutoUBL.utils.CSVReader;
 
 /**
  *
@@ -23,7 +24,10 @@ public class BanEntry {
     }
 
     public BanEntry(String rawCSV) {
-        String[] parts = rawCSV.split(",");
+        String[] parts = CSVReader.parseLine(rawCSV);
+        if (parts.length != 6) {
+            throw new IllegalArgumentException("Expected 6 columns: " + rawCSV);
+        }
         this.ign = parts[0];
         this.reason = parts[1];
         this.banDate = parts[2];
