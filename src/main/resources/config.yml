@@ -13,7 +13,7 @@
 #                      for startup only)
 # exempt: a list of players exempt from the UBL on this server
 ---
-banlist-url: 'http://www.paralleluhc.net/ubl/list/ubl.txt'
+banlist-url: 'https://docs.google.com/spreadsheet/ccc?key=0AjACyg1Jc3_GdEhqWU5PTEVHZDVLYWphd2JfaEZXd2c&output=csv'
 max-bandwidth: 64
 timeout: 5
 retries: 3

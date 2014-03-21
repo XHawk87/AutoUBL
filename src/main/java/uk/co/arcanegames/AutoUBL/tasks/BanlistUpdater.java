@@ -200,7 +200,11 @@ public class BanlistUpdater implements Runnable {
             public void run() {
                 // Split on EOL
                 String[] lines = data.split("\\r?\\n");
-                plugin.setBanList(Arrays.asList(lines));
+                if (lines.length < 2) {
+                    plugin.getLogger().warning("Banlist is empty!");
+                    return;
+                }
+                plugin.setBanList(Arrays.asList(Arrays.copyOfRange(lines, 1, lines.length)));
             }
         }.runTask(plugin);
     }

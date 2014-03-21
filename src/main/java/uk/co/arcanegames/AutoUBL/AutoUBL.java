@@ -1,8 +1,10 @@
 package uk.co.arcanegames.AutoUBL;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -18,7 +20,7 @@ import uk.co.arcanegames.AutoUBL.tasks.BanlistUpdater;
 public class AutoUBL extends MultiThreadedJavaPlugin {
 
     private BanlistUpdater banlistUpdater;
-    private Set<String> banlist;
+    private Map<String, BanEntry> banlist;
     private Set<String> exempt;
 
     @Override
@@ -102,12 +104,20 @@ public class AutoUBL extends MultiThreadedJavaPlugin {
      */
     public boolean isBanned(String name) {
         String lname = name.toLowerCase();
-        return banlist.contains(lname) && !exempt.contains(lname);
+        return banlist.containsKey(lname) && !exempt.contains(lname);
     }
 
+    public String getBanMessage(String name) {
+        BanEntry banEntry = banlist.get(name.toLowerCase());
+        if (banEntry == null) {
+            return "Not on the UBL";
+        }
+        return "UBL - " + banEntry.getReason() + " - " + banEntry.getCourtPost();
+    }
+    
     /**
      * Check if the banlist is ready
-     * 
+     *
      * @return True, if the banlist can be checked, otherwise false
      */
     public boolean isReady() {
@@ -115,11 +125,16 @@ public class AutoUBL extends MultiThreadedJavaPlugin {
     }
 
     /**
-     * Update the entire ban-list, overwriting any previous settings
-     * 
+     * Update the entire ban-list using raw CSV lines, overwriting any previous
+     * settings
+     *
      * @param banlist The new ban-list
      */
     public void setBanList(List<String> banlist) {
-        this.banlist = new HashSet<>(banlist);
+        this.banlist = new HashMap<>();
+        for (String rawCSV : banlist) {
+            BanEntry banEntry = new BanEntry(rawCSV);
+            this.banlist.put(banEntry.getIgn(), banEntry);
+        }
     }
 }

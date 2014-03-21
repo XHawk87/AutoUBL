@@ -31,7 +31,7 @@ public class LoginListener implements Listener {
             return;
         }
         if (plugin.isBanned(event.getName())) {
-            event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED, "You are on the UBL");
+            event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED, plugin.getBanMessage(event.getName()));
         }
     }
 }
