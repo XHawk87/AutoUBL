@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
@@ -65,37 +66,6 @@ public class BanlistUpdater implements Runnable {
     }
 
     /**
-     * Attempt to connect to the given URL up to a specified number of times and
-     * set up a stream reader with the appropriate buffer size
-     *
-     * @param url The ban-list server URL
-     * @param bufferSize The size of the data buffer
-     * @param retries The maximum number of retry attempts
-     * @return The stream reader
-     * @throws InterruptedException If the thread is interrupted while waiting
-     * @throws IOException If it failed to connect on all attempts
-     */
-    private BufferedReader connect(URL url, int bufferSize, int retries) throws InterruptedException, IOException {
-        // Continue looping until successful or an error is thrown
-        while (true) {
-            try {
-                return new BufferedReader(new InputStreamReader(url.openStream()), bufferSize);
-            } catch (IOException ex) {
-                retries--;
-                plugin.getLogger().warning("Failed to connect to " + url.getHost());
-                if (retries > 0) {
-                    plugin.getLogger().warning(retries + " retries remaining");
-                    // Wait 1 second before attempting to reconnect
-                    Thread.sleep(1000);
-                } else {
-                    // Out of tries, throw the error
-                    throw ex;
-                }
-            }
-        }
-    }
-
-    /**
      * Attempt to download the ban-list from the given stream within the
      * specified time limit
      *
@@ -119,20 +89,20 @@ public class BanlistUpdater implements Runnable {
         try {
             char[] buffer = new char[bufferSize];
             StringBuilder sb = new StringBuilder();
-            
+
             // Loop until interrupted or end of stream
             while (true) {
                 // Attempt to read up to the buffer size
                 int bytesRead = in.read(buffer);
-                
+
                 // End of stream has been reached, return the raw data
                 if (bytesRead == -1) {
                     return sb.toString();
                 }
-                
+
                 // Append what was read to the raw data string
                 sb.append(buffer, 0, bytesRead);
-                
+
                 // Wait one server tick
                 Thread.sleep(50);
             }
@@ -165,7 +135,36 @@ public class BanlistUpdater implements Runnable {
         String data;
         BufferedReader in;
         try {
-            in = connect(url, bufferSize, retries);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setConnectTimeout(timeout * 1000);
+            conn.setReadTimeout(timeout * 1000);
+            boolean found = false;
+            int tries = 0;
+            while (!found) {
+                int status = conn.getResponseCode();
+                if (status == HttpURLConnection.HTTP_MOVED_TEMP
+                        || status == HttpURLConnection.HTTP_MOVED_PERM
+                        || status == HttpURLConnection.HTTP_SEE_OTHER) {
+                    // get redirect url from "location" header field
+                    String newUrl = conn.getHeaderField("Location");
+
+                    // get the cookie if need, for login
+                    String cookies = conn.getHeaderField("Set-Cookie");
+
+                    // open the new connnection again
+                    conn = (HttpURLConnection) new URL(newUrl).openConnection();
+                    conn.setRequestProperty("Cookie", cookies);
+                } else if (status == HttpURLConnection.HTTP_OK) {
+                    found = true;
+                } else {
+                    tries++;
+                    if (tries >= retries) {
+                        throw new IOException("Failed to reach " + url.getHost() + " after " + retries + " attempts");
+                    }
+                }
+            }
+
+            in = new BufferedReader(new InputStreamReader(conn.getInputStream()), bufferSize);
 
             // Download banlist
             try {
@@ -181,11 +180,8 @@ public class BanlistUpdater implements Runnable {
 
             // Save backup
             saveToBackup(data);
-        } catch (InterruptedException ex) {
-            plugin.getLogger().log(Level.SEVERE, "Interrupted while attempting to contact banlist server", ex);
-            return;
         } catch (IOException ex) {
-            plugin.getLogger().warning("Banlist server " + banlistURL + " is currently unreachable");
+            plugin.getLogger().log(Level.WARNING, "Banlist server " + banlistURL + " is currently unreachable", ex);
             data = loadFromBackup();
         }
 
@@ -211,9 +207,9 @@ public class BanlistUpdater implements Runnable {
 
     /**
      * Load raw ban-list from the backup file, if it exists.
-     * 
+     *
      * If there are any problems, return an empty string
-     * 
+     *
      * @return The raw ban-list, or an empty string
      */
     public String loadFromBackup() {
@@ -244,9 +240,9 @@ public class BanlistUpdater implements Runnable {
 
     /**
      * Save the raw ban-list data to the backup file
-     * 
+     *
      * This should not be run on the main server thread
-     * 
+     *
      * @param data The raw ban-list data
      */
     public void saveToBackup(String data) {
