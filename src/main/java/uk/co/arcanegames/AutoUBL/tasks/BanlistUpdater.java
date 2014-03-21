@@ -122,24 +122,22 @@ public class BanlistUpdater implements Runnable {
         int bufferSize = (maxBandwidth * 1024) / 20;
         int timeout = config.getInt("timeout", 5);
 
-        // Parse the banlist URL
-        URL url;
-        try {
-            url = new URL(banlistURL);
-        } catch (MalformedURLException ex) {
-            plugin.getLogger().severe("banlist-url in the config.yml is invalid or corrupt. This must be corrected and the config reloaded before the UBL can be updated");
-            return;
-        }
-
         // Attempt to connect to the banlist server
+        URL url;
         String data;
         BufferedReader in;
         try {
+            url = new URL(banlistURL);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setInstanceFollowRedirects(false);
             conn.setConnectTimeout(timeout * 1000);
             conn.setReadTimeout(timeout * 1000);
+            conn.addRequestProperty("Accept-Language", "en-US,en;q=0.8");
+            conn.addRequestProperty("User-Agent", "Mozilla");
+            conn.addRequestProperty("Referer", "google.com");
             boolean found = false;
             int tries = 0;
+            StringBuilder cookies = new StringBuilder();
             while (!found) {
                 int status = conn.getResponseCode();
                 if (status == HttpURLConnection.HTTP_MOVED_TEMP
@@ -149,11 +147,30 @@ public class BanlistUpdater implements Runnable {
                     String newUrl = conn.getHeaderField("Location");
 
                     // get the cookie if need, for login
-                    String cookies = conn.getHeaderField("Set-Cookie");
+                    String headerName;
+                    for (int i = 1; (headerName = conn.getHeaderFieldKey(i)) != null; i++) {
+                        if (headerName.equals("Set-Cookie")) {
+                            String newCookie = conn.getHeaderField(i);
+                            newCookie = newCookie.substring(0, newCookie.indexOf(";"));
+                            String cookieName = newCookie.substring(0, newCookie.indexOf("="));
+                            String cookieValue = newCookie.substring(newCookie.indexOf("=") + 1, newCookie.length());
+                            System.out.println("Set-Cookie: " + newCookie);
+                            if (cookies.length() != 0) {
+                                cookies.append("; ");
+                            }
+                            cookies.append(cookieName).append("=").append(cookieValue);
+                        }
+                    }
 
                     // open the new connnection again
                     conn = (HttpURLConnection) new URL(newUrl).openConnection();
-                    conn.setRequestProperty("Cookie", cookies);
+                    conn.setInstanceFollowRedirects(false);
+                    conn.setRequestProperty("Cookie", cookies.toString());
+                    conn.setConnectTimeout(timeout * 1000);
+                    conn.setReadTimeout(timeout * 1000);
+                    conn.addRequestProperty("Accept-Language", "en-US,en;q=0.8");
+                    conn.addRequestProperty("User-Agent", "Mozilla");
+                    conn.addRequestProperty("Referer", "google.com");
                 } else if (status == HttpURLConnection.HTTP_OK) {
                     found = true;
                 } else {
@@ -180,6 +197,9 @@ public class BanlistUpdater implements Runnable {
 
             // Save backup
             saveToBackup(data);
+        } catch (MalformedURLException ex) {
+            plugin.getLogger().severe("banlist-url in the config.yml is invalid or corrupt. This must be corrected and the config reloaded before the UBL can be updated");
+            data = loadFromBackup();
         } catch (IOException ex) {
             plugin.getLogger().log(Level.WARNING, "Banlist server " + banlistURL + " is currently unreachable", ex);
             data = loadFromBackup();
