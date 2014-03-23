@@ -134,7 +134,7 @@ public class AutoUBL extends MultiThreadedJavaPlugin {
         this.banlist = new HashMap<>();
         for (String rawCSV : banlist) {
             BanEntry banEntry = new BanEntry(rawCSV);
-            this.banlist.put(banEntry.getIgn(), banEntry);
+            this.banlist.put(banEntry.getIgn().toLowerCase(), banEntry);
         }
     }
 }
