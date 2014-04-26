@@ -219,7 +219,7 @@ public class BanlistUpdater implements Runnable {
                     plugin.getLogger().warning("Banlist is empty!");
                     return;
                 }
-                plugin.setBanList(Arrays.asList(Arrays.copyOfRange(lines, 1, lines.length)));
+                plugin.setBanList(lines[0], Arrays.asList(Arrays.copyOfRange(lines, 1, lines.length)));
             }
         }.runTask(plugin);
     }

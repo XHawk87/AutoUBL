@@ -1,4 +1,9 @@
 # banlist-url: The URL to check for the banlist
+# fields: Important field names to search for
+#   ign: The field name used for player in-game names
+#   uuid: The field name used for player UUIDs
+# ban-message: The message to be sent to banned players. May contain field 
+#              values where the field name is specified inside {curly braces}
 # max-bandwidth: The maximum bandwidth to allocate to loading the banlist in 
 #                kB/sec (faster values load the banlist quicker, lower values 
 #                reduce the impact of denial of service attacks from the banlist 
@@ -14,6 +19,10 @@
 # exempt: a list of players exempt from the UBL on this server
 ---
 banlist-url: 'https://docs.google.com/spreadsheet/ccc?key=0AjACyg1Jc3_GdEhqWU5PTEVHZDVLYWphd2JfaEZXd2c&output=csv'
+fields:
+  ign: IGN
+  uuid: UUID
+ban-message: 'UBL - {Reason} - {Courtroom Post}'
 max-bandwidth: 64
 timeout: 5
 retries: 3

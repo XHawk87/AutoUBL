@@ -1,16 +1,21 @@
 package uk.co.arcanegames.AutoUBL;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.scheduler.BukkitRunnable;
 import uk.co.arcanegames.AutoUBL.commands.UBLCommand;
 import uk.co.arcanegames.AutoUBL.listeners.LoginListener;
 import uk.co.arcanegames.AutoUBL.tasks.BanlistUpdater;
+import uk.co.arcanegames.AutoUBL.utils.CSVReader;
+import uk.co.arcanegames.AutoUBL.utils.StringTemplate;
 
 /**
  * An automatic UBL plugin for the /r/ultrahardcore community
@@ -20,8 +25,10 @@ import uk.co.arcanegames.AutoUBL.tasks.BanlistUpdater;
 public class AutoUBL extends MultiThreadedJavaPlugin {
 
     private BanlistUpdater banlistUpdater;
-    private Map<String, BanEntry> banlist;
+    private Map<String, BanEntry> banlistByIGN;
+    private Map<UUID, BanEntry> banlistByUUID;
     private Set<String> exempt;
+    private StringTemplate banMessageTemplate;
 
     @Override
     public void onEnable() {
@@ -44,6 +51,11 @@ public class AutoUBL extends MultiThreadedJavaPlugin {
             public void run() {
                 getLogger().info("Configuration reloaded, checking UBL for updates");
                 FileConfiguration config = getConfig();
+                try {
+                    banMessageTemplate = StringTemplate.getStringTemplate(config.getString("ban-message", "UBL - {Reason} - {Courtroom Post}"));
+                } catch (IllegalArgumentException ex) {
+                    new InvalidConfigurationException("Invalid ban-message", ex).printStackTrace();
+                }
                 exempt = new HashSet<>(config.getStringList("exempt"));
                 int autoCheckInterval = config.getInt("auto-check-interval", 60);
                 if (autoCheckInterval > 0) {
@@ -99,29 +111,70 @@ public class AutoUBL extends MultiThreadedJavaPlugin {
      * Check if the given player is banned on the UBL and is not exempt on this
      * server
      *
-     * @param name The player to check
+     * @param ign The in-game name of the player to check
      * @return True, if the player is banned and not exempt, otherwise false
      */
-    public boolean isBanned(String name) {
-        String lname = name.toLowerCase();
-        return banlist.containsKey(lname) && !exempt.contains(lname);
+    public boolean isBanned(String ign) {
+        String lname = ign.toLowerCase();
+        return banlistByIGN.containsKey(lname) && !exempt.contains(lname);
     }
 
-    public String getBanMessage(String name) {
-        BanEntry banEntry = banlist.get(name.toLowerCase());
+    /**
+     * Check if the given player is banned on the UBL and is not exempt on this
+     * server
+     *
+     * @param ign The in-game name of the player to check against the exemptions
+     * @param uuid The universally unique identifier of the player to check
+     * @return True, if the player is banned and not exempt, otherwise false
+     */
+    public boolean isBanned(String ign, UUID uuid) {
+        return banlistByUUID.containsKey(uuid) && !exempt.contains(ign.toLowerCase());
+    }
+
+    /**
+     * @param ign The in-game name of the banned player
+     * @return A personalised ban message for this player
+     */
+    public String getBanMessage(String ign) {
+        BanEntry banEntry = banlistByIGN.get(ign.toLowerCase());
         if (banEntry == null) {
             return "Not on the UBL";
         }
-        return "UBL - " + banEntry.getReason() + " - " + banEntry.getCourtPost();
+        return banMessageTemplate.format(banEntry.getData());
     }
-    
+
     /**
-     * Check if the banlist is ready
+     * @param uuid The universally unique identifier of the banned player
+     * @return A personalised ban message for this player
+     */
+    public String getBanMessage(UUID uuid) {
+        BanEntry banEntry = banlistByUUID.get(uuid);
+        if (banEntry == null) {
+            return "Not on the UBL";
+        }
+        return banMessageTemplate.format(banEntry.getData());
+    }
+
+    /**
+     * Check if the ban-list is ready. This will only be the case if a ban-list
+     * has been downloaded or read from backup and contains either an IGN field
+     * or a UUID field from which to check players
      *
      * @return True, if the banlist can be checked, otherwise false
      */
     public boolean isReady() {
-        return banlist != null;
+        return banlistByIGN != null && banlistByUUID != null
+                && (!banlistByIGN.isEmpty() || !banlistByUUID.isEmpty());
+    }
+
+    /**
+     * Check if the ban-list is ready and can be queried using player UUIDs
+     * instead of IGNs
+     *
+     * @return True, if the ban-list can be checked using UUIDs, otherwise false
+     */
+    public boolean isUUIDReady() {
+        return banlistByUUID != null && !banlistByUUID.isEmpty();
     }
 
     /**
@@ -130,11 +183,59 @@ public class AutoUBL extends MultiThreadedJavaPlugin {
      *
      * @param banlist The new ban-list
      */
-    public void setBanList(List<String> banlist) {
-        this.banlist = new HashMap<>();
-        for (String rawCSV : banlist) {
-            BanEntry banEntry = new BanEntry(rawCSV);
-            this.banlist.put(banEntry.getIgn().toLowerCase(), banEntry);
+    public void setBanList(String fieldNamesCSV, List<String> banlist) {
+        String[] fieldNames = CSVReader.parseLine(fieldNamesCSV);
+        if (!Arrays.asList(fieldNames).contains(getIGNFieldName())) {
+            getLogger().warning("There is no matching IGN field (" + getIGNFieldName() + ") in the ban-list data. Please check the UBL spreadsheet and set 'fields.ign' in your config.yml to the correct field name");
+            getServer().broadcast("[AutoUBL] No IGN field found in the ban-list data. If you also have no UUID field then your server will be locked to non-ops for your protection. Please see your server logs for details in how to fix this issue", "bukkit.op");
         }
+        if (!Arrays.asList(fieldNames).contains(getUUIDFieldName())) {
+            getLogger().warning("There is no matching UUID field (" + getUUIDFieldName() + ") in the ban-list data. Please check the UBL spreadsheet and set 'fields.uuid' in your config.yml to the correct field name");
+            getServer().broadcast("[AutoUBL] No UUID field found in the ban-list data. If Mojang has not yet allowed name-changing, this is not a problem. Otherwise, please check your server logs for details on how to fix this issue", "bukkit.op");
+        }
+        this.banlistByIGN = new HashMap<>();
+        this.banlistByUUID = new HashMap<>();
+        for (String rawCSV : banlist) {
+            BanEntry banEntry = new BanEntry(fieldNames, rawCSV);
+            String ign = banEntry.getData(getIGNFieldName());
+            if (ign != null) {
+                this.banlistByIGN.put(ign.toLowerCase(), banEntry);
+                banEntry.setIgn(ign);
+            }
+            String uuidString = banEntry.getData(getUUIDFieldName());
+            if (uuidString != null) {
+                if (uuidString.length() == 32) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append(uuidString.substring(0, 8)).append('-');
+                    sb.append(uuidString.substring(8, 12)).append('-');
+                    sb.append(uuidString.substring(12, 16)).append('-');
+                    sb.append(uuidString.substring(16, 20)).append('-');
+                    sb.append(uuidString.substring(20, 32));
+                    uuidString = sb.toString();
+                }
+                if (uuidString.length() == 36) {
+                    UUID uuid = UUID.fromString(uuidString);
+                    this.banlistByUUID.put(uuid, banEntry);
+                    banEntry.setUUID(uuid);
+                } else {
+                    getLogger().warning("Invalid UUID in ban-list for " + ign + ": " + uuidString);
+                }
+            }
+        }
+    }
+
+    /**
+     * @return The field name to check for the player's in-game name
+     */
+    public String getIGNFieldName() {
+        return getConfig().getString("fields.ign", "IGN");
+    }
+
+    /**
+     * @return The field name to check for the player's universally unique
+     * identifier
+     */
+    public String getUUIDFieldName() {
+        return getConfig().getString("fields.uuid", "UUID");
     }
 }

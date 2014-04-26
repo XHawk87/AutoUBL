@@ -1,18 +1,21 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package uk.co.arcanegames.AutoUBL.utils;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * A simple CSV parser for reading ban-list data
+ * 
  * @author XHawk87
  */
 public class CSVReader {
 
+    /**
+     * Parse out a single record from one line of raw data
+     * 
+     * @param line The line of raw data
+     * @return An array of field values
+     */
     public static String[] parseLine(String line) {
         List<String> fields = new ArrayList<>();
         StringBuilder sb = new StringBuilder();
