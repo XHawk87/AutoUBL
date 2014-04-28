@@ -5,14 +5,14 @@ import java.util.List;
 
 /**
  * A simple CSV parser for reading ban-list data
- * 
+ *
  * @author XHawk87
  */
 public class CSVReader {
 
     /**
      * Parse out a single record from one line of raw data
-     * 
+     *
      * @param line The line of raw data
      * @return An array of field values
      */
@@ -35,9 +35,7 @@ public class CSVReader {
                 sb.append(c);
             }
         }
-        if (sb.length() != 0) {
-            fields.add(sb.toString());
-        }
+        fields.add(sb.toString());
         return fields.toArray(new String[fields.size()]);
     }
 }
