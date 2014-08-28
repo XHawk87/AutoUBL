@@ -52,7 +52,13 @@ public class AutoUBL extends MultiThreadedJavaPlugin {
                 getLogger().info("Configuration reloaded, checking UBL for updates");
                 FileConfiguration config = getConfig();
                 try {
-                    banMessageTemplate = StringTemplate.getStringTemplate(config.getString("ban-message", "UBL - {Reason} - {Courtroom Post}"));
+                    String banMessage = config.getString("ban-message", null);
+                    if (banMessage == null || banMessage.isEmpty()) {
+                        banMessage = "UBL - {Reason} - {Courtroom Post}";
+                        config.set("ban-message", banMessage);
+                        saveConfig();
+                    }
+                    banMessageTemplate = StringTemplate.getStringTemplate(banMessage);
                 } catch (IllegalArgumentException ex) {
                     new InvalidConfigurationException("Invalid ban-message", ex).printStackTrace();
                 }
@@ -228,7 +234,13 @@ public class AutoUBL extends MultiThreadedJavaPlugin {
      * @return The field name to check for the player's in-game name
      */
     public String getIGNFieldName() {
-        return getConfig().getString("fields.ign", "IGN");
+        String ignFieldName = getConfig().getString("fields.ign", null);
+        if (ignFieldName == null || ignFieldName.isEmpty()) {
+            ignFieldName = "IGN";
+            getConfig().set("fields.ign", "IGN");
+            saveConfig();
+        }
+        return ignFieldName;
     }
 
     /**
@@ -236,6 +248,12 @@ public class AutoUBL extends MultiThreadedJavaPlugin {
      * identifier
      */
     public String getUUIDFieldName() {
-        return getConfig().getString("fields.uuid", "UUID");
+        String uuidFieldName = getConfig().getString("fields.uuid", null);
+        if (uuidFieldName == null || uuidFieldName.isEmpty()) {
+            uuidFieldName = "UUID";
+            getConfig().set("fields.uuid", "UUID");
+            saveConfig();
+        }
+        return uuidFieldName;
     }
 }
