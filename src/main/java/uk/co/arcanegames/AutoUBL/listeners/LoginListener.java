@@ -45,7 +45,7 @@ public class LoginListener implements Listener {
                     String ign = event.getName();
                     UUID uuid = UUIDFetcher.getUUIDOf(ign);
                     if (plugin.isBanned(ign, uuid)) {
-                        event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED, plugin.getBanMessage(event.getUniqueId()));
+                        event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED, plugin.getBanMessage(uuid));
                     }
                 } catch (Exception ex1) { // The UUID could not be located, server down or not a real account
                     plugin.getLogger().log(Level.WARNING, "Failed to lookup UUID of " + event.getName(), ex1);
