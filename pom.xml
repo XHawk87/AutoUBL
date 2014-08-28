@@ -4,7 +4,7 @@
 
     <groupId>uk.co.arcanegames</groupId>
     <artifactId>AutoUBL</artifactId>
-    <version>0.1.1</version>
+    <version>0.1.2</version>
     <packaging>jar</packaging>
 
     <name>AutoUBL</name>
@@ -24,7 +24,7 @@
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
             <!-- Bukkit API Version, change if necessary -->
-            <version>1.7.9-R0.1-SNAPSHOT</version>
+            <version>1.7.9-R0.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

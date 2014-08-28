@@ -1,11 +1,13 @@
 package uk.co.arcanegames.AutoUBL.listeners;
 
 import java.util.UUID;
+import java.util.logging.Level;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import uk.co.arcanegames.AutoUBL.AutoUBL;
+import uk.co.arcanegames.AutoUBL.utils.UUIDFetcher;
 
 /**
  * This listens for players attempting to connect to the server and checks them
@@ -38,7 +40,18 @@ public class LoginListener implements Listener {
                 }
                 return;
             } catch (NoSuchMethodError ex) { // In case the server does not yet have AsyncPlayerPreLoginEvent.getUniqueId() method
-                plugin.getLogger().warning("This server is outdated and not capable of detecting player UUIDs before they join. Falling back on IGNs for now, please consider updating to at least the latest CB 1.7.5-R0.1-SNAPSHOT or later");
+                plugin.getLogger().warning("This server is outdated so we are forced to fall back on a slow inefficient method fetcher player UUIDs from Mojangs API server. Please consider updating to at least the latest CB 1.7.5-R0.1-SNAPSHOT or later");
+                try {
+                    String ign = event.getName();
+                    UUID uuid = UUIDFetcher.getUUIDOf(ign);
+                    if (plugin.isBanned(ign, uuid)) {
+                        event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED, plugin.getBanMessage(event.getUniqueId()));
+                    }
+                } catch (Exception ex1) { // The UUID could not be located, server down or not a real account
+                    plugin.getLogger().log(Level.WARNING, "Failed to lookup UUID of " + event.getName(), ex1);
+                    event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, "Authentication failed due to " + ex1.getLocalizedMessage());
+                }
+                return;
             }
         }
         if (plugin.isBanned(event.getName())) {
