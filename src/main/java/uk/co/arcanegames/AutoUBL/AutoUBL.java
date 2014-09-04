@@ -208,7 +208,7 @@ public class AutoUBL extends MultiThreadedJavaPlugin {
                 this.banlistByIGN.put(ign.toLowerCase(), banEntry);
                 banEntry.setIgn(ign);
             }
-            String uuidString = banEntry.getData(getUUIDFieldName());
+            String uuidString = banEntry.getData(getUUIDFieldName()).trim();
             if (uuidString != null) {
                 if (uuidString.length() == 32) {
                     StringBuilder sb = new StringBuilder();

@@ -4,7 +4,7 @@
 
     <groupId>uk.co.arcanegames</groupId>
     <artifactId>AutoUBL</artifactId>
-    <version>0.1.4</version>
+    <version>0.1.5</version>
     <packaging>jar</packaging>
 
     <name>AutoUBL</name>
