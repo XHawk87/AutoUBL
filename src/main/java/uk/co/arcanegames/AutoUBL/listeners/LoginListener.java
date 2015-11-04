@@ -3,6 +3,7 @@ package uk.co.arcanegames.AutoUBL.listeners;
 import java.util.UUID;
 import java.util.logging.Level;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -38,7 +39,9 @@ public class LoginListener implements Listener {
         if (plugin.isUUIDReady()) {
             try {
                 if (plugin.isBanned(event.getName(), event.getUniqueId())) {
-                    event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED, plugin.getBanMessage(event.getUniqueId()));
+                    event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED,
+                            ChatColor.translateAlternateColorCodes('&', plugin.getBanMessage(event.getUniqueId()))
+                    );
                 }
                 return;
             } catch (NoSuchMethodError ex) { // In case the server does not yet have AsyncPlayerPreLoginEvent.getUniqueId() method
