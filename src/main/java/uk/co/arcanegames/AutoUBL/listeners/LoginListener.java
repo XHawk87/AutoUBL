@@ -16,8 +16,7 @@ import uk.co.arcanegames.AutoUBL.utils.UUIDFetcher;
  * This listens for players attempting to connect to the server and checks them
  * against the ban-list asynchronously
  *
- * Nobody will be allowed onto the server until the ban-list has had a chance to
- * load
+ * Login attempts when the ban list is not ready will be delayed until it is ready.
  *
  * @author XHawk87
  */
@@ -33,8 +32,12 @@ public class LoginListener implements Listener {
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onLogin(AsyncPlayerPreLoginEvent event) {
         if (!plugin.isReady()) {
-            event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, "AutoUBL is not ready");
-            return;
+            // AsyncPreLogin always gets fired on an User Authentifactor thread,
+            // using Thread.sleep() won't kill the server.
+            boolean proceed = waitUntilReady();
+            if (!proceed) {
+                return;
+            }
         }
         if (plugin.isUUIDReady()) {
             try {
@@ -64,5 +67,22 @@ public class LoginListener implements Listener {
                     ChatColor.translateAlternateColorCodes('&', plugin.getBanMessage(event.getName()))
             );
         }
+    }
+
+    /**
+     * Wait until the plugin is ready.
+     * @return True if operation should continue as normal,
+     * false if the plugin was disabled mid-wait.
+     */
+    private boolean waitUntilReady() {
+        while (!plugin.isReady()) {
+            if (!plugin.isEnabled()) {
+                return false;
+            }
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException ignored) {}
+        }
+        return true;
     }
 }
