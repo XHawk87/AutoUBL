@@ -36,6 +36,9 @@ public class LoginListener implements Listener {
             // using Thread.sleep() won't kill the server.
             boolean proceed = waitUntilReady();
             if (!proceed) {
+                event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
+                        "AutoUBL was disabled during initialization of banlist"
+                );
                 return;
             }
         }
