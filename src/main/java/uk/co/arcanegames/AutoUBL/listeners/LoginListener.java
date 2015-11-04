@@ -2,6 +2,8 @@ package uk.co.arcanegames.AutoUBL.listeners;
 
 import java.util.UUID;
 import java.util.logging.Level;
+
+import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -55,7 +57,9 @@ public class LoginListener implements Listener {
             }
         }
         if (plugin.isBanned(event.getName())) {
-            event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED, plugin.getBanMessage(event.getName()));
+            event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED,
+                    ChatColor.translateAlternateColorCodes('&', plugin.getBanMessage(event.getName()))
+            );
         }
     }
 }
