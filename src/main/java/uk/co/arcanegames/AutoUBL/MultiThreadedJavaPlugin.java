@@ -104,7 +104,8 @@ public abstract class MultiThreadedJavaPlugin extends JavaPlugin {
             @Override
             public void run() {
                 reloadConfig();
-                notifier.runTask(getPlugin());
+                // Only run the task if the plugin is still enabled.
+                if (isEnabled()) notifier.runTask(getPlugin());
             }
         }.setNotifier(notifier).runTaskAsynchronously(this);
     }

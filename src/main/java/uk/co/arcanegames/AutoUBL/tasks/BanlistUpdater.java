@@ -182,6 +182,9 @@ public class BanlistUpdater implements Runnable {
 
             in = new BufferedReader(new InputStreamReader(conn.getInputStream()), bufferSize);
 
+            // While opening connections, the plugin may have been disabled
+            if (!plugin.isEnabled()) return;
+
             // Download banlist
             try {
                 data = downloadBanlist(in, bufferSize, timeout * 20);
@@ -204,8 +207,8 @@ public class BanlistUpdater implements Runnable {
             data = loadFromBackup();
         }
 
-        // Parse banlist data
-        parseData(data);
+        // Parse banlist data if plugin is still enabled
+        if (plugin.isEnabled()) parseData(data);
     }
 
     private void parseData(final String data) {
