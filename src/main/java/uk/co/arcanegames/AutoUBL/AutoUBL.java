@@ -52,12 +52,7 @@ public class AutoUBL extends MultiThreadedJavaPlugin {
                 getLogger().info("Configuration reloaded, checking UBL for updates");
                 FileConfiguration config = getConfig();
                 try {
-                    String banMessage = config.getString("ban-message", null);
-                    if (banMessage == null || banMessage.isEmpty()) {
-                        banMessage = "UBL - {Reason} - {Courtroom Post}";
-                        config.set("ban-message", banMessage);
-                        saveConfig();
-                    }
+                    String banMessage = config.getString("ban-message", "UBL - {Reason} - {Courtroom Post}");
                     banMessageTemplate = StringTemplate.getStringTemplate(banMessage);
                 } catch (IllegalArgumentException ex) {
                     new InvalidConfigurationException("Invalid ban-message", ex).printStackTrace();

@@ -22,8 +22,12 @@ banlist-url: 'https://docs.google.com/spreadsheet/ccc?key=0AjACyg1Jc3_GdEhqWU5PT
 fields:
   ign: IGN
   uuid: UUID
-ban-message: 'UBL - {Reason} - {Courtroom Post}'
-max-bandwidth: 64
+ban-message: |
+  &4You are on the Reddit UHC Universal Ban List:&r
+  {Reason}
+
+  Case: &9{Case}
+max-bandwidth: 1024
 timeout: 5
 retries: 3
 auto-check-interval: 0
