@@ -17,21 +17,22 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 public class UUIDFetcher implements Callable<Map<String, UUID>> {
+
     private static final double PROFILES_PER_REQUEST = 100;
     private static final String PROFILE_URL = "https://api.mojang.com/profiles/minecraft";
     private final JSONParser jsonParser = new JSONParser();
     private final List<String> names;
     private final boolean rateLimiting;
- 
+
     public UUIDFetcher(List<String> names, boolean rateLimiting) {
         this.names = ImmutableList.copyOf(names);
         this.rateLimiting = rateLimiting;
     }
- 
+
     public UUIDFetcher(List<String> names) {
         this(names, true);
     }
- 
+
     @Override
     public Map<String, UUID> call() throws Exception {
         Map<String, UUID> uuidMap = new HashMap<>();
@@ -54,14 +55,14 @@ public class UUIDFetcher implements Callable<Map<String, UUID>> {
         }
         return uuidMap;
     }
- 
+
     private static void writeBody(HttpURLConnection connection, String body) throws Exception {
         try (OutputStream stream = connection.getOutputStream()) {
             stream.write(body.getBytes());
             stream.flush();
         }
     }
- 
+
     private static HttpURLConnection createConnection() throws Exception {
         URL url = new URL(PROFILE_URL);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -72,18 +73,18 @@ public class UUIDFetcher implements Callable<Map<String, UUID>> {
         connection.setDoOutput(true);
         return connection;
     }
- 
+
     private static UUID getUUID(String id) {
-        return UUID.fromString(id.substring(0, 8) + "-" + id.substring(8, 12) + "-" + id.substring(12, 16) + "-" + id.substring(16, 20) + "-" +id.substring(20, 32));
+        return UUID.fromString(id.substring(0, 8) + "-" + id.substring(8, 12) + "-" + id.substring(12, 16) + "-" + id.substring(16, 20) + "-" + id.substring(20, 32));
     }
- 
+
     public static byte[] toBytes(UUID uuid) {
         ByteBuffer byteBuffer = ByteBuffer.wrap(new byte[16]);
         byteBuffer.putLong(uuid.getMostSignificantBits());
         byteBuffer.putLong(uuid.getLeastSignificantBits());
         return byteBuffer.array();
     }
- 
+
     public static UUID fromBytes(byte[] array) {
         if (array.length != 16) {
             throw new IllegalArgumentException("Illegal byte array length: " + array.length);
@@ -93,7 +94,7 @@ public class UUIDFetcher implements Callable<Map<String, UUID>> {
         long leastSignificant = byteBuffer.getLong();
         return new UUID(mostSignificant, leastSignificant);
     }
- 
+
     public static UUID getUUIDOf(String name) throws Exception {
         return new UUIDFetcher(Arrays.asList(name)).call().get(name);
     }

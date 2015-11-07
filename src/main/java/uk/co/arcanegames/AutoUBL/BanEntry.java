@@ -75,7 +75,7 @@ public class BanEntry {
 
     /**
      * Sets the value of a given field
-     * 
+     *
      * @param fieldName The field name to set a value for
      * @param value The value to set for this field
      */

@@ -18,8 +18,8 @@ import org.bukkit.scheduler.BukkitTask;
 import uk.co.arcanegames.AutoUBL.AutoUBL;
 
 /**
- * This task attempts to update the ban-list from the ban-list server and backs
- * up the ban-list locally.
+ * This task attempts to update the ban-list from the ban-list server and
+ * backs up the ban-list locally.
  *
  * If the ban-list server is not available, it will be reloaded from backup
  *
@@ -183,7 +183,9 @@ public class BanlistUpdater implements Runnable {
             in = new BufferedReader(new InputStreamReader(conn.getInputStream()), bufferSize);
 
             // While opening connections, the plugin may have been disabled
-            if (!plugin.isEnabled()) return;
+            if (!plugin.isEnabled()) {
+                return;
+            }
 
             // Download banlist
             try {
@@ -208,7 +210,9 @@ public class BanlistUpdater implements Runnable {
         }
 
         // Parse banlist data if plugin is still enabled
-        if (plugin.isEnabled()) parseData(data);
+        if (plugin.isEnabled()) {
+            parseData(data);
+        }
     }
 
     private void parseData(final String data) {

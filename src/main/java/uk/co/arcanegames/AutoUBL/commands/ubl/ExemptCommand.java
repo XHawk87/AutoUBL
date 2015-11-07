@@ -7,7 +7,7 @@ import uk.co.arcanegames.AutoUBL.commands.IUBLCommand;
 
 /**
  * This command adds players to the exempt list
- * 
+ *
  * @author XHawk87
  */
 public class ExemptCommand implements IUBLCommand {
@@ -39,7 +39,7 @@ public class ExemptCommand implements IUBLCommand {
         if (args.length > 1) {
             return false; // Too many arguments
         }
-        
+
         String playerName = args[0];
         if (plugin.exempt(playerName)) {
             sender.sendMessage(playerName + " is now exempt from the UBL on this server");

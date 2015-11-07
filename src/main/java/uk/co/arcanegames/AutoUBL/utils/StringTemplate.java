@@ -51,8 +51,8 @@ public class StringTemplate {
     }
 
     /**
-     * Build a new StringTemplate from template text. The template must be plain
-     * text with field names surrounded by {curly braces}.
+     * Build a new StringTemplate from template text. The template must be
+     * plain text with field names surrounded by {curly braces}.
      *
      * @param template The template
      * @return A prepared StringTemplate

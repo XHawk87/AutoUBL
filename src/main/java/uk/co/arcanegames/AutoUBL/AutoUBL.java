@@ -109,8 +109,8 @@ public class AutoUBL extends MultiThreadedJavaPlugin {
     }
 
     /**
-     * Check if the given player is banned on the UBL and is not exempt on this
-     * server
+     * Check if the given player is banned on the UBL and is not exempt on
+     * this server
      *
      * @param ign The in-game name of the player to check
      * @return True, if the player is banned and not exempt, otherwise false
@@ -121,10 +121,11 @@ public class AutoUBL extends MultiThreadedJavaPlugin {
     }
 
     /**
-     * Check if the given player is banned on the UBL and is not exempt on this
-     * server
+     * Check if the given player is banned on the UBL and is not exempt on
+     * this server
      *
-     * @param ign The in-game name of the player to check against the exemptions
+     * @param ign The in-game name of the player to check against the
+     * exemptions
      * @param uuid The universally unique identifier of the player to check
      * @return True, if the player is banned and not exempt, otherwise false
      */
@@ -157,9 +158,9 @@ public class AutoUBL extends MultiThreadedJavaPlugin {
     }
 
     /**
-     * Check if the ban-list is ready. This will only be the case if a ban-list
-     * has been downloaded or read from backup and contains either an IGN field
-     * or a UUID field from which to check players
+     * Check if the ban-list is ready. This will only be the case if a
+     * ban-list has been downloaded or read from backup and contains either an
+     * IGN field or a UUID field from which to check players
      *
      * @return True, if the banlist can be checked, otherwise false
      */
@@ -172,15 +173,16 @@ public class AutoUBL extends MultiThreadedJavaPlugin {
      * Check if the ban-list is ready and can be queried using player UUIDs
      * instead of IGNs
      *
-     * @return True, if the ban-list can be checked using UUIDs, otherwise false
+     * @return True, if the ban-list can be checked using UUIDs, otherwise
+     * false
      */
     public boolean isUUIDReady() {
         return banlistByUUID != null && !banlistByUUID.isEmpty();
     }
 
     /**
-     * Update the entire ban-list using raw CSV lines, overwriting any previous
-     * settings
+     * Update the entire ban-list using raw CSV lines, overwriting any
+     * previous settings
      *
      * @param banlist The new ban-list
      */

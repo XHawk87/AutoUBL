@@ -13,10 +13,11 @@ import uk.co.arcanegames.AutoUBL.AutoUBL;
 import uk.co.arcanegames.AutoUBL.utils.UUIDFetcher;
 
 /**
- * This listens for players attempting to connect to the server and checks them
- * against the ban-list asynchronously
+ * This listens for players attempting to connect to the server and checks
+ * them against the ban-list asynchronously
  *
- * Login attempts when the ban list is not ready will be delayed until it is ready.
+ * Login attempts when the ban list is not ready will be delayed until it is
+ * ready.
  *
  * @author XHawk87
  */
@@ -74,8 +75,9 @@ public class LoginListener implements Listener {
 
     /**
      * Wait until the plugin is ready.
-     * @return True if operation should continue as normal,
-     * false if the plugin was disabled mid-wait.
+     *
+     * @return True if operation should continue as normal, false if the
+     * plugin was disabled mid-wait.
      */
     private boolean waitUntilReady() {
         while (!plugin.isReady()) {
@@ -84,7 +86,8 @@ public class LoginListener implements Listener {
             }
             try {
                 Thread.sleep(10);
-            } catch (InterruptedException ignored) {}
+            } catch (InterruptedException ignored) {
+            }
         }
         return true;
     }

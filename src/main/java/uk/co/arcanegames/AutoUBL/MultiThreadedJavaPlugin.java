@@ -105,14 +105,17 @@ public abstract class MultiThreadedJavaPlugin extends JavaPlugin {
             public void run() {
                 reloadConfig();
                 // Only run the task if the plugin is still enabled.
-                if (isEnabled()) notifier.runTask(getPlugin());
+                if (isEnabled()) {
+                    notifier.runTask(getPlugin());
+                }
             }
         }.setNotifier(notifier).runTaskAsynchronously(this);
     }
 
     @Override
     /**
-     * This is not safe to use in the main thread. Use reloadConfigAsync instead
+     * This is not safe to use in the main thread. Use reloadConfigAsync
+     * instead
      */
     public void reloadConfig() {
         if (getServer().isPrimaryThread()) {

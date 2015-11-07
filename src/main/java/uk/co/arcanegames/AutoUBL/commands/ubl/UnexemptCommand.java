@@ -39,7 +39,7 @@ public class UnexemptCommand implements IUBLCommand {
         if (args.length > 1) {
             return false; // Too many arguments
         }
-        
+
         String playerName = args[0];
         if (plugin.unexempt(playerName)) {
             sender.sendMessage(playerName + " is no longer exempt from the UBL on this server");
